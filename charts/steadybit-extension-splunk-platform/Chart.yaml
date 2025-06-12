@@ -1,0 +1,25 @@
+apiVersion: v2
+name: steadybit-extension-splunk-platform
+description: Steadybit Splunk Cloud Platform and Splunk Enterprise extension Helm chart for Kubernetes.
+version: 1.0.0
+appVersion: v1.0.0
+home: https://www.steadybit.com/
+icon: https://steadybit-website-assets.s3.amazonaws.com/logo-symbol-transparent.png
+maintainers:
+  - email: norbert@steadybit.com
+    name: bertschneider
+sources:
+  - https://github.com/steadybit/extension-splunk-platform
+annotations:
+  artifacthub.io/images: |
+    - name: logo
+      image: https://steadybit-website-assets.s3.amazonaws.com/logo-symbol-transparent.png
+  artifacthub.io/links: |-
+    - name: Steadybit website
+      url: https://www.steadybit.com
+    - name: Steadybit reliability hub
+      url: https://hub.steadybit.com
+dependencies:
+  - name: extensionlib
+    version: ^1.4.4
+    repository: https://steadybit.github.io/helm-charts
