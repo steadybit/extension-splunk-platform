@@ -12,6 +12,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
 )
 
 type mockServer struct {
@@ -19,10 +20,10 @@ type mockServer struct {
 }
 
 func createMockSplunkApiServer() *mockServer {
-	// Generate self-signed certificate for TLS
-	cert, err := generateSelfSignedCert()
+	// Load certificate from environment variables (set by generateSelfSignedCert)
+	serverCert, err := tls.LoadX509KeyPair(os.Getenv("CERT_FILE"), os.Getenv("KEY_FILE"))
 	if err != nil {
-		panic(fmt.Sprintf("httptest: failed to generate self-signed certificate: %v", err))
+		panic(fmt.Sprintf("httptest: failed to load certificate: %v", err))
 	}
 
 	listener, err := net.Listen("tcp", "0.0.0.0:0")
@@ -34,11 +35,11 @@ func createMockSplunkApiServer() *mockServer {
 	server := httptest.Server{
 		Listener: listener,
 		Config: &http.Server{
-			Handler: mux,
+			Handler:   mux,
 			TLSConfig: &tls.Config{},
 		},
 		TLS: &tls.Config{
-			Certificates: []tls.Certificate{cert},
+			Certificates: []tls.Certificate{serverCert},
 		},
 	}
 

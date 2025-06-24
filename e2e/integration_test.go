@@ -22,40 +22,90 @@ import (
 func TestWithMinikube(t *testing.T) {
 	extlogging.InitZeroLog()
 
+	// Generate self-signed certificate for testing
+	cleanup, err := generateSelfSignedCert()
+	require.NoError(t, err)
+	defer cleanup()
+
 	server := createMockSplunkApiServer()
 	defer server.http.Close()
 	split := strings.SplitAfter(server.http.URL, ":")
 	port := split[len(split)-1]
 
-	extFactory := e2e.HelmExtensionFactory{
-		Name: "extension-splunk-platform",
-		Port: 8083,
-		ExtraArgs: func(m *e2e.Minikube) []string {
-			return []string{
-				"--set", fmt.Sprintf("splunk.apiBaseUrl=https://host.minikube.internal:%s", port),
-				"--set", "logging.level=trace",
-				"--set", "splunk.insecureSkipVerify=true", // Enable skipping TLS verification
-			}
-		},
-	}
+	// Test with insecureSkipVerify approach
+	t.Run("with insecureSkipVerify", func(t *testing.T) {
+		extFactory := e2e.HelmExtensionFactory{
+			Name: "extension-splunk-platform",
+			Port: 8083,
+			ExtraArgs: func(m *e2e.Minikube) []string {
+				return []string{
+					"--set", fmt.Sprintf("splunk.apiBaseUrl=https://host.minikube.internal:%s", port),
+					"--set", "logging.level=trace",
+					"--set", "splunk.insecureSkipVerify=true", // Enable skipping TLS verification
+				}
+			},
+		}
 
-	e2e.WithDefaultMinikube(t, &extFactory, []e2e.WithMinikubeTestCase{
-		{
-			Name: "test discovery",
-			Test: testDiscovery,
-		},
-		{
-			Name: "validate discovery",
-			Test: validateDiscovery,
-		},
-		{
-			Name: "validate actions",
-			Test: validateActions,
-		},
-		{
-			Name: "test check action",
-			Test: testCheckAction,
-		},
+		e2e.WithDefaultMinikube(t, &extFactory, []e2e.WithMinikubeTestCase{
+			{
+				Name: "test discovery with insecureSkipVerify",
+				Test: testDiscovery,
+			},
+			{
+				Name: "validate discovery with insecureSkipVerify",
+				Test: validateDiscovery,
+			},
+			{
+				Name: "validate actions with insecureSkipVerify",
+				Test: validateActions,
+			},
+			{
+				Name: "test check action with insecureSkipVerify",
+				Test: testCheckAction,
+			},
+		})
+	})
+
+	// Test with custom certificate approach
+	t.Run("with custom certificate", func(t *testing.T) {
+		extFactory := e2e.HelmExtensionFactory{
+			Name: "extension-splunk-platform",
+			Port: 8083,
+			ExtraArgs: func(m *e2e.Minikube) []string {
+				return []string{
+					"--set", fmt.Sprintf("splunk.apiBaseUrl=https://host.minikube.internal:%s", port),
+					"--set", "logging.level=trace",
+					"--set", "splunk.insecureSkipVerify=false", // Disable insecureSkipVerify
+					// Use extraVolumeMounts, extraVolumes and extraEnv instead
+					"--set", "extraVolumeMounts[0].name=extra-certs",
+					"--set", "extraVolumeMounts[0].mountPath=/etc/ssl/extra-certs",
+					"--set", "extraVolumeMounts[0].readOnly=true",
+					"--set", "extraVolumes[0].name=extra-certs",
+					"--set", "extraVolumes[0].configMap.name=splunk-self-signed-ca",
+					"--set", "extraEnv[0].name=SSL_CERT_DIR",
+					"--set", "extraEnv[0].value=/etc/ssl/extra-certs:/etc/ssl/certs",
+				}
+			},
+		}
+
+		e2e.WithMinikube(t, e2e.DefaultMinikubeOpts().AfterStart(installConfigMap), &extFactory, []e2e.WithMinikubeTestCase{
+			{
+				Name: "test discovery with custom certificate",
+				Test: testDiscovery,
+			},
+			{
+				Name: "validate discovery with custom certificate",
+				Test: validateDiscovery,
+			},
+			{
+				Name: "validate actions with custom certificate",
+				Test: validateActions,
+			},
+			{
+				Name: "test check action with custom certificate",
+				Test: testCheckAction,
+			},
+		})
 	})
 }
 
