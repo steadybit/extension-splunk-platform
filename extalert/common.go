@@ -37,7 +37,7 @@ type SplunkClient struct {
 
 func NewSplunkClient() *SplunkClient {
 	client := resty.New()
-	if config.Config.DisableCertificateValidation {
+	if config.Config.InsecureSkipVerify {
 		client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) //NOSONAR explicit choice
 	}
 	client.SetBaseURL(strings.TrimRight(config.Config.ApiBaseUrl, "/"))

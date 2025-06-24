@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"crypto/tls"
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/extension-kit/exthttp"
@@ -18,15 +19,31 @@ type mockServer struct {
 }
 
 func createMockSplunkApiServer() *mockServer {
+	// Generate self-signed certificate for TLS
+	cert, err := generateSelfSignedCert()
+	if err != nil {
+		panic(fmt.Sprintf("httptest: failed to generate self-signed certificate: %v", err))
+	}
+
 	listener, err := net.Listen("tcp", "0.0.0.0:0")
 	if err != nil {
 		panic(fmt.Sprintf("httptest: failed to listen: %v", err))
 	}
 	mux := http.NewServeMux()
 
-	server := httptest.Server{Listener: listener, Config: &http.Server{Handler: mux}}
-	server.Start()
-	log.Info().Str("url", server.URL).Msg("Started Mock-Server")
+	server := httptest.Server{
+		Listener: listener,
+		Config: &http.Server{
+			Handler: mux,
+			TLSConfig: &tls.Config{},
+		},
+		TLS: &tls.Config{
+			Certificates: []tls.Certificate{cert},
+		},
+	}
+
+	server.StartTLS()
+	log.Info().Str("url", server.URL).Msg("Started Secure Mock-Server with self-signed certificate")
 
 	mock := &mockServer{http: &server}
 	mux.Handle("GET /services/saved/searches", handler(mock.getSavedSearches))

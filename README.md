@@ -18,12 +18,12 @@ Supported Splunk Cloud Platform and Splunk Enterprise versions:
 
 ## Configuration
 
-| Environment Variable                                      | Helm value           | Meaning                                                                                                                              | Required | Default |
-|-----------------------------------------------------------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------|----------|---------|
-| `STEADYBIT_EXTENSION_ACCESS_TOKEN`                        | `splunk.accessToken` | The token required to access the Splunk Cloud Platform or Splunk Enterprise.                                                         | Yes      |         |
-| `STEADYBIT_EXTENSION_API_BASE_URL`                        | `splunk.apiBaseUrl`  | The API URL of the Splunk Cloud Platform or Splunk Enterprise instance, for example `https://<deployment-name>.splunkcloud.com:8089` | Yes      |         |
-| `STEADYBIT_EXTENSION_DISABLE_CERTIFICATE_VALIDATION`      |                      | Disable TLS certificate validation.                                                                                                  | No       | False   |
-| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ALERT` |                      | List of Alert Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                | No       |         |
+| Environment Variable                                      | Helm value                  | Meaning                                                                                                                              | Required | Default |
+|-----------------------------------------------------------|-----------------------------|--------------------------------------------------------------------------------------------------------------------------------------|----------|---------|
+| `STEADYBIT_EXTENSION_ACCESS_TOKEN`                        | `splunk.accessToken`        | The token required to access the Splunk Cloud Platform or Splunk Enterprise.                                                         | Yes      |         |
+| `STEADYBIT_EXTENSION_API_BASE_URL`                        | `splunk.apiBaseUrl`         | The API URL of the Splunk Cloud Platform or Splunk Enterprise instance, for example `https://<deployment-name>.splunkcloud.com:8089` | Yes      |         |
+| `STEADYBIT_EXTENSION_INSECURE_SKIP_VERIFY`                | `splunk.insecureSkipVerify` | Disable TLS certificate validation.                                                                                                  | No       | False   |
+| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ALERT` |                             | List of Alert Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                | No       |         |
 
 The extension supports all environment variables provided by [steadybit/extension-kit](https://github.com/steadybit/extension-kit#environment-variables).
 
@@ -79,6 +79,45 @@ After installing, configure the extension by editing `/etc/steadybit/extension-s
 Make sure that the extension is registered with the agent. In most cases this is done automatically. Please refer to
 the [documentation](https://docs.steadybit.com/install-and-configure/install-agent/extension-registration) for more
 information about extension registration and how to verify.
+
+
+## Importing your own certificates
+
+You may want to import your own certificates for connecting to Jenkins instances with self-signed certificates. This can be done in two ways:
+
+### Option 1: Using InsecureSkipVerify
+
+The extension provides the `insecureSkipVerify` option which disables TLS certificate verification. This is suitable for testing but not recommended for production environments.
+
+```yaml
+splunk:
+  insecureSkipVerify: true
+```
+
+### Option 2: Mounting custom certificates
+
+Mount a volume with your custom certificates and reference it in `extraVolumeMounts` and `extraVolumes` in the helm chart.
+
+This example uses a config map to store the `*.crt`-files:
+
+```shell
+kubectl create configmap -n steadybit-agent splunk-self-signed-ca --from-file=./self-signed-ca.crt
+```
+
+```yaml
+extraVolumeMounts:
+  - name: extra-certs
+    mountPath: /etc/ssl/extra-certs
+    readOnly: true
+extraVolumes:
+  - name: extra-certs
+    configMap:
+      name: splunk-self-signed-ca
+extraEnv:
+  - name: SSL_CERT_DIR
+    value: /etc/ssl/extra-certs:/etc/ssl/certs
+```
+
 
 ## Version and Revision
 

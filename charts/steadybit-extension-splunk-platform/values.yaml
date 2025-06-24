@@ -5,6 +5,8 @@ splunk:
   apiBaseUrl: ""
   # splunk.existingSecret -- If defined, will skip secret creation and instead assume that the referenced secret contains the keys api-base-url and access-token.
   existingSecret: null
+  # splunk.disableCertificateValidation -- If true, the extension will skip TLS verification when connecting to Splunk (for self-signed certificates)
+  insecureSkipVerify: false
 
 image:
   # image.name -- The container image to use.
@@ -132,6 +134,22 @@ extraEnv: []
 #  - secretRef:
 #    name: env-secrets
 extraEnvFrom: []
+
+# extraVolumeMounts -- Additional volumeMounts to add to the container
+# e.g:
+# extraVolumeMounts:
+#   - name: extra-certs
+#     mountPath: /etc/ssl/extra-certs
+#     readOnly: true
+extraVolumeMounts: []
+
+# extraVolumes -- Additional volumes to add to the pod
+# e.g:
+# extraVolumes:
+#   - name: extra-certs
+#     configMap:
+#       name: splunk-self-signed-ca
+extraVolumes: []
 
 discovery:
   attributes:

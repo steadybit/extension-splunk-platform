@@ -12,7 +12,7 @@ type Specification struct {
 	AccessToken                      string   `json:"accessToken" split_words:"true" required:"true"`
 	ApiBaseUrl                       string   `json:"apiBaseUrl" split_words:"true" required:"true"`
 	DiscoveryAttributesExcludesAlert []string `json:"discoveryAttributesExcludesAlert" split_words:"true" required:"false"`
-	DisableCertificateValidation     bool     `json:"disableCertificateValidation" split_words:"true" default:"false"`
+	InsecureSkipVerify               bool     `json:"insecureSkipVerify" split_words:"true" default:"false"`
 }
 
 var (
