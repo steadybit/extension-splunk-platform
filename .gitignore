@@ -5,3 +5,4 @@
 /snyk.sarif
 .idea
 .env
+/.vscode
