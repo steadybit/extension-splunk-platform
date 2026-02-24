@@ -9,13 +9,17 @@ splunk:
   insecureSkipVerify: false
 
 image:
+  # image.registry -- The container registry to use. Defaults to global.image.registry or ghcr.io.
+  registry: null
   # image.name -- The container image to use.
-  name: ghcr.io/steadybit/extension-splunk-platform
+  name: steadybit/extension-splunk-platform
   # image.tag -- tag name of the extension-splunk-platform container image to use. Defaults to appVersion of this chart.
   # See https://github.com/steadybit/extension-splunk/pkgs/container/extension-splunk-platform/versions for all tags.
   tag: null
   # image.pullPolicy -- Specifies when to pull the image container.
   pullPolicy: IfNotPresent
+  # image.pullSecrets -- List of image pull secret names.
+  pullSecrets: []
 
 tls:
   server:
