@@ -6,13 +6,15 @@ package e2e
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/rs/zerolog/log"
-	"github.com/steadybit/extension-kit/exthttp"
-	"github.com/steadybit/extension-splunk-platform/extalert"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/steadybit/extension-kit/exthttp"
+	"github.com/steadybit/extension-splunk-platform/extalert"
 )
 
 type mockServer struct {
