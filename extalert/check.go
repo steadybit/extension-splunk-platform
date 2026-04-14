@@ -64,20 +64,20 @@ func (a *AlertCheckAction) Describe() action_kit_api.ActionDescription {
 		Label:       "Alert Status",
 		Description: "Check the status of an alert.",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(targetIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:        new(targetIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType:          TargetType,
 			QuantityRestriction: extutil.Ptr(action_kit_api.All),
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "Alert name",
-					Description: extutil.Ptr("Find alert by name"),
+					Description: new("Find alert by name"),
 					Query:       attributeName + "=\"\"",
 				},
 			}),
 		}),
-		Technology:  extutil.Ptr("Splunk"),
-		Category:    extutil.Ptr("Monitoring"),
+		Technology:  new("Splunk"),
+		Category:    new("Monitoring"),
 		Kind:        action_kit_api.Check,
 		TimeControl: action_kit_api.TimeControlInternal,
 		Parameters: []action_kit_api.ActionParameter{
@@ -85,23 +85,23 @@ func (a *AlertCheckAction) Describe() action_kit_api.ActionDescription {
 				Name:         "duration",
 				Label:        "Duration",
 				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("30s"),
-				Required:     extutil.Ptr(true),
+				DefaultValue: new("30s"),
+				Required:     new(true),
 			},
 			{
 				Name:         "checkNewAlertsOnly",
 				Label:        "New Alerts Only",
-				Description:  extutil.Ptr("Only check events fired after the start of the experiment."),
+				Description:  new("Only check events fired after the start of the experiment."),
 				Type:         action_kit_api.ActionParameterTypeBoolean,
-				DefaultValue: extutil.Ptr("false"),
-				Required:     extutil.Ptr(true),
+				DefaultValue: new("false"),
+				Required:     new(true),
 			},
 			{
 				Name:         "expectedState",
 				Label:        "Expected State",
 				Type:         action_kit_api.ActionParameterTypeString,
-				DefaultValue: extutil.Ptr(alertFired),
-				Options: extutil.Ptr([]action_kit_api.ParameterOption{
+				DefaultValue: new(alertFired),
+				Options: new([]action_kit_api.ParameterOption{
 					action_kit_api.ExplicitParameterOption{
 						Label: "Alert fired",
 						Value: alertFired,
@@ -111,15 +111,15 @@ func (a *AlertCheckAction) Describe() action_kit_api.ActionDescription {
 						Value: alertNotFired,
 					},
 				}),
-				Required: extutil.Ptr(true),
+				Required: new(true),
 			},
 			{
 				Name:         "stateCheckMode",
 				Label:        "State Check Mode",
-				Description:  extutil.Ptr("How often should the observed state match the expectation?"),
+				Description:  new("How often should the observed state match the expectation?"),
 				Type:         action_kit_api.ActionParameterTypeString,
-				DefaultValue: extutil.Ptr(stateCheckModeAtLeastOnce),
-				Options: extutil.Ptr([]action_kit_api.ParameterOption{
+				DefaultValue: new(stateCheckModeAtLeastOnce),
+				Options: new([]action_kit_api.ParameterOption{
 					action_kit_api.ExplicitParameterOption{
 						Label: "All the time",
 						Value: stateCheckModeAllTheTime,
@@ -129,10 +129,10 @@ func (a *AlertCheckAction) Describe() action_kit_api.ActionDescription {
 						Value: stateCheckModeAtLeastOnce,
 					},
 				}),
-				Required: extutil.Ptr(true),
+				Required: new(true),
 			},
 		},
-		Widgets: extutil.Ptr([]action_kit_api.Widget{
+		Widgets: new([]action_kit_api.Widget{
 			action_kit_api.StateOverTimeWidget{
 				Type:  action_kit_api.ComSteadybitWidgetStateOverTime,
 				Title: "Alert State",
@@ -148,13 +148,13 @@ func (a *AlertCheckAction) Describe() action_kit_api.ActionDescription {
 				Tooltip: action_kit_api.StateOverTimeWidgetTooltipConfig{
 					From: metricTooltip,
 				},
-				Value: extutil.Ptr(action_kit_api.StateOverTimeWidgetValueConfig{
-					Hide: extutil.Ptr(true),
+				Value: new(action_kit_api.StateOverTimeWidgetValueConfig{
+					Hide: new(true),
 				}),
 			},
 		}),
-		Status: extutil.Ptr(action_kit_api.MutatingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr("1s"),
+		Status: new(action_kit_api.MutatingEndpointReferenceWithCallInterval{
+			CallInterval: new("1s"),
 		}),
 	}
 }
@@ -232,21 +232,21 @@ func checkFiredAlerts(ctx context.Context, state *AlertCheckState, client FiredA
 	return &action_kit_api.StatusResult{
 		Completed: completed,
 		Error:     checkError,
-		Metrics:   extutil.Ptr(toMetrics(state.Name, firedAlerts, now)),
+		Metrics:   new(toMetrics(state.Name, firedAlerts, now)),
 	}, nil
 }
 
 func checkAllTheTime(state *AlertCheckState, firedAlerts []Entry) *action_kit_api.ActionKitError {
 	if state.ExpectedState == alertNotFired && len(firedAlerts) > 0 {
 		triggerTime := time.Unix(firedAlerts[0].Content.TriggerTime, 0).UTC().Format(time.RFC3339)
-		return extutil.Ptr(action_kit_api.ActionKitError{
+		return new(action_kit_api.ActionKitError{
 			Title:  fmt.Sprintf("Alert %q should not have been fired but was at %s.", state.Name, triggerTime),
 			Status: extutil.Ptr(action_kit_api.Failed),
 		})
 	}
 
 	if state.ExpectedState == alertFired && len(firedAlerts) == 0 {
-		return extutil.Ptr(action_kit_api.ActionKitError{
+		return new(action_kit_api.ActionKitError{
 			Title:  fmt.Sprintf("Alert %q should have been fired all the time but was not.", state.Name),
 			Status: extutil.Ptr(action_kit_api.Failed),
 		})
@@ -273,7 +273,7 @@ func checkAtLeastOnce(state *AlertCheckState, completed bool, firedAlerts []Entr
 		} else {
 			title = fmt.Sprintf("Alert %q should have been fired but was not.", state.Name)
 		}
-		return extutil.Ptr(action_kit_api.ActionKitError{
+		return new(action_kit_api.ActionKitError{
 			Title:  title,
 			Status: extutil.Ptr(action_kit_api.Failed),
 		})
@@ -295,7 +295,7 @@ func toMetrics(alertName string, firedAlerts []Entry, now time.Time) []action_ki
 
 	return []action_kit_api.Metric{
 		{
-			Name: extutil.Ptr(fmt.Sprintf("Splunk Alert %s", alertName)),
+			Name: new(fmt.Sprintf("Splunk Alert %s", alertName)),
 			Metric: map[string]string{
 				metricId:          alertName,
 				metricLabel:       alertName,
