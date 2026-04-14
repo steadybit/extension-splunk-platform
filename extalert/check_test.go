@@ -34,7 +34,7 @@ func TestAlertCheckAction_Prepare(t *testing.T) {
 				attributeUrl:  {"url"},
 			},
 		},
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration":           1000,
 			"expectedState":      alertFired,
 			"stateCheckMode":     stateCheckModeAtLeastOnce,
