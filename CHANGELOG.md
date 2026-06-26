@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- fix: guard the alert check against targets missing the name/url attributes instead of panicking
+- fix: terminate alert paging on the returned page size instead of the server-reported total, preventing an infinite request loop (and dropped results) when Splunk reports an inaccurate total
+
 ## v1.0.12
 
 

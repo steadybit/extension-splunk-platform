@@ -180,9 +180,18 @@ func (a *AlertCheckAction) Prepare(_ context.Context, state *AlertCheckState, re
 
 	checkNewAlertsOnly := extutil.ToBool(request.Config["checkNewAlertsOnly"])
 
+	alertName := request.Target.Attributes[attributeName]
+	if len(alertName) == 0 {
+		return nil, fmt.Errorf("target is missing the name attribute")
+	}
+	alertUrl := request.Target.Attributes[attributeUrl]
+	if len(alertUrl) == 0 {
+		return nil, fmt.Errorf("target is missing the url attribute")
+	}
+
 	state.Id = alertId[0]
-	state.Name = request.Target.Attributes[attributeName][0]
-	state.Url = request.Target.Attributes[attributeUrl][0]
+	state.Name = alertName[0]
+	state.Url = alertUrl[0]
 	state.CheckNewAlertsOnly = checkNewAlertsOnly
 	state.Start = start
 	state.End = end

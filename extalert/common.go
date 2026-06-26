@@ -59,15 +59,15 @@ func (c *SplunkClient) FiredAlerts(ctx context.Context, alertUrl string) ([]Entr
 }
 
 func (c *SplunkClient) query(ctx context.Context, url string, params map[string]string) ([]Entry, error) {
+	const pageSize = 30
 	var entries []Entry
-	total := 1
 
-	for len(entries) < total {
+	for {
 		var response Response
 		request := c.client.R().
 			SetContext(ctx).
 			SetResult(&response).
-			SetQueryParam("count", "30").
+			SetQueryParam("count", strconv.Itoa(pageSize)).
 			SetQueryParam("offset", strconv.Itoa(len(entries))).
 			SetQueryParam("output_mode", "json")
 
@@ -88,8 +88,15 @@ func (c *SplunkClient) query(ctx context.Context, url string, params map[string]
 		}
 
 		log.Trace().Msgf("Splunk response (offset: %d): %v", len(entries), response)
-		total = response.Paging.Total
 		entries = append(entries, response.Entries...)
+
+		// A page smaller than the requested size (including an empty one) is the last page.
+		// Terminating on the returned page size rather than the server-reported total avoids
+		// an infinite loop if the total is never reached (and an extra request per run), and
+		// is robust to an inaccurate total.
+		if len(response.Entries) < pageSize {
+			break
+		}
 	}
 	return entries, nil
 }
