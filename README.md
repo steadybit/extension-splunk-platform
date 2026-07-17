@@ -3,7 +3,7 @@
 A [Steadybit](https://www.steadybit.com/) extension to integrate [Splunk Cloud Platform](https://www.splunk.com/en_us/products/splunk-cloud-platform.html)
 and [Splunk Enterprise](https://www.splunk.com/en_us/products/splunk-enterprise.html).
 
-Learn about the capabilities of this extension in our [Reliability Hub](https://hub.steadybit.com/extension/com.steadybit.extension_splunk-platform).
+Learn about the capabilities of this extension in our [Reliability Hub](https://hub.steadybit.com/extension/com.steadybit.extension_splunk_platform).
 
 ## Prerequisites
 
