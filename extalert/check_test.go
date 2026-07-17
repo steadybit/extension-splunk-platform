@@ -266,6 +266,7 @@ func TestAlertCheckAction_checkFiredAlerts_allTheTime_expectFired_noAlertPresent
 		End:            time.Now().Add(1 * time.Minute),
 		ExpectedState:  alertFired,
 		StateCheckMode: stateCheckModeAllTheTime,
+		FailEarly:      true,
 	}
 
 	result, err := checkFiredAlerts(t.Context(), &state, mockClient)
@@ -274,6 +275,37 @@ func TestAlertCheckAction_checkFiredAlerts_allTheTime_expectFired_noAlertPresent
 	require.False(t, result.Completed)
 	require.NotNil(t, result.Error)
 	require.Contains(t, result.Error.Title, `Alert "Alert Name" should have been fired all the time but was not.`)
+}
+
+func TestAlertCheckAction_checkFiredAlerts_allTheTime_failAtEnd(t *testing.T) {
+	mockClient := MockSplunkClient{
+		response: []Entry{},
+	}
+	state := AlertCheckState{
+		Id:             "alertId",
+		Name:           "Alert Name",
+		Url:            "http://example.com/alertId",
+		Start:          time.Now().Add(-1 * time.Minute),
+		End:            time.Now().Add(1 * time.Minute), // not yet completed
+		ExpectedState:  alertFired,
+		StateCheckMode: stateCheckModeAllTheTime,
+		FailEarly:      false,
+	}
+
+	// Deviation observed but time not up: must not fail early, deviation is remembered.
+	result, err := checkFiredAlerts(t.Context(), &state, mockClient)
+	require.NoError(t, err)
+	require.False(t, result.Completed)
+	require.Nil(t, result.Error)
+	require.NotEmpty(t, state.DeviationTitle)
+
+	// Time is up: the remembered deviation is reported.
+	state.End = time.Now().Add(-1 * time.Second)
+	result, err = checkFiredAlerts(t.Context(), &state, mockClient)
+	require.NoError(t, err)
+	require.True(t, result.Completed)
+	require.NotNil(t, result.Error)
+	require.Contains(t, result.Error.Title, `should have been fired all the time but was not.`)
 }
 
 func TestAlertCheckAction_checkFiredAlerts_allTheTime_expectFired_noAlertPresent_completed(t *testing.T) {
@@ -288,6 +320,7 @@ func TestAlertCheckAction_checkFiredAlerts_allTheTime_expectFired_noAlertPresent
 		End:            time.Now().Add(-1 * time.Minute),
 		ExpectedState:  alertFired,
 		StateCheckMode: stateCheckModeAllTheTime,
+		FailEarly:      true,
 	}
 
 	result, err := checkFiredAlerts(t.Context(), &state, mockClient)
@@ -314,6 +347,7 @@ func TestAlertCheckAction_checkFiredAlerts_allTheTime_expectFired_withAlert_runn
 		End:            now.Add(+1 * time.Minute),
 		ExpectedState:  alertFired,
 		StateCheckMode: stateCheckModeAllTheTime,
+		FailEarly:      true,
 	}
 
 	result, err := checkFiredAlerts(t.Context(), &state, mockClient)
@@ -339,6 +373,7 @@ func TestAlertCheckAction_checkFiredAlerts_allTheTime_expectFired_withAlert_comp
 		End:            now.Add(-1 * time.Minute),
 		ExpectedState:  alertFired,
 		StateCheckMode: stateCheckModeAllTheTime,
+		FailEarly:      true,
 	}
 
 	result, err := checkFiredAlerts(t.Context(), &state, mockClient)
@@ -360,6 +395,7 @@ func TestAlertCheckAction_checkFiredAlerts_allTheTime_expectNotFired_noAlertPres
 		End:            time.Now().Add(1 * time.Minute),
 		ExpectedState:  alertNotFired,
 		StateCheckMode: stateCheckModeAllTheTime,
+		FailEarly:      true,
 	}
 
 	result, err := checkFiredAlerts(t.Context(), &state, mockClient)
@@ -381,6 +417,7 @@ func TestAlertCheckAction_checkFiredAlerts_allTheTime_expectNotFired_noAlertPres
 		End:            time.Now().Add(-1 * time.Minute),
 		ExpectedState:  alertNotFired,
 		StateCheckMode: stateCheckModeAllTheTime,
+		FailEarly:      true,
 	}
 
 	result, err := checkFiredAlerts(t.Context(), &state, mockClient)
@@ -408,6 +445,7 @@ func TestAlertCheckAction_checkFiredAlerts_allTheTime_expectNotFired_withAlert_r
 		End:            now.Add(+1 * time.Minute),
 		ExpectedState:  alertNotFired,
 		StateCheckMode: stateCheckModeAllTheTime,
+		FailEarly:      true,
 	}
 
 	result, err := checkFiredAlerts(t.Context(), &state, mockClient)
@@ -436,6 +474,7 @@ func TestAlertCheckAction_checkFiredAlerts_allTheTime_expectNotFired_withAlert_c
 		End:            now.Add(-1 * time.Minute),
 		ExpectedState:  alertNotFired,
 		StateCheckMode: stateCheckModeAllTheTime,
+		FailEarly:      true,
 	}
 
 	result, err := checkFiredAlerts(t.Context(), &state, mockClient)
@@ -465,6 +504,7 @@ func TestAlertCheckAction_checkFiredAlerts_onlyNewAlerts_withOldOne(t *testing.T
 		ExpectedState:      alertNotFired,
 		StateCheckMode:     stateCheckModeAllTheTime,
 		CheckNewAlertsOnly: true,
+		FailEarly:          true,
 	}
 
 	result, _ := checkFiredAlerts(t.Context(), &state, mockClient)
@@ -491,6 +531,7 @@ func TestAlertCheckAction_checkFiredAlerts_onlyNewAlerts_withNewOne(t *testing.T
 		ExpectedState:      alertNotFired,
 		StateCheckMode:     stateCheckModeAllTheTime,
 		CheckNewAlertsOnly: true,
+		FailEarly:          true,
 	}
 
 	result, _ := checkFiredAlerts(t.Context(), &state, mockClient)
@@ -510,6 +551,7 @@ func TestAlertCheckAction_checkFiredAlerts_error_on_lookup(t *testing.T) {
 		End:            now.Add(-1 * time.Minute),
 		ExpectedState:  alertNotFired,
 		StateCheckMode: stateCheckModeAllTheTime,
+		FailEarly:      true,
 	}
 
 	_, err := checkFiredAlerts(t.Context(), &state, mockClient)
