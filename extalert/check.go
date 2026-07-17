@@ -37,7 +37,11 @@ type AlertCheckState struct {
 	ExpectedState      string
 	StateCheckMode     string
 	StateCheckSuccess  bool
-	TriggerTime        int64
+	FailEarly          bool
+	// DeviationTitle remembers the first observed deviation in 'All the time' + fail-at-end mode
+	// (FailEarly = false) so it can be reported once the step ends.
+	DeviationTitle string
+	TriggerTime    int64
 }
 
 const (
@@ -131,6 +135,15 @@ func (a *AlertCheckAction) Describe() action_kit_api.ActionDescription {
 				}),
 				Required: new(true),
 			},
+			{
+				Name:         "failEarly",
+				Label:        "Fail early",
+				Description:  new("If enabled, the check fails as soon as a deviating state is observed. If disabled, the check keeps collecting events for the whole duration and only fails at the end of the step. Only affects the 'All the time' mode; 'At least once' can only be evaluated at the end of the step."),
+				Type:         action_kit_api.ActionParameterTypeBoolean,
+				DefaultValue: new("true"),
+				Advanced:     new(true),
+				Required:     new(false),
+			},
 		},
 		Widgets: new([]action_kit_api.Widget{
 			action_kit_api.StateOverTimeWidget{
@@ -197,6 +210,11 @@ func (a *AlertCheckAction) Prepare(_ context.Context, state *AlertCheckState, re
 	state.End = end
 	state.ExpectedState = expectedState
 	state.StateCheckMode = stateCheckMode
+	// Default to failing early to preserve the previous behavior for experiments that don't set this parameter.
+	state.FailEarly = true
+	if request.Config["failEarly"] != nil {
+		state.FailEarly = extutil.ToBool(request.Config["failEarly"])
+	}
 
 	log.Trace().Any("state", state).Msg("check action state")
 
@@ -233,7 +251,22 @@ func checkFiredAlerts(ctx context.Context, state *AlertCheckState, client FiredA
 	completed := now.After(state.End)
 	var checkError *action_kit_api.ActionKitError
 	if state.StateCheckMode == stateCheckModeAllTheTime {
-		checkError = checkAllTheTime(state, firedAlerts)
+		deviation := checkAllTheTime(state, firedAlerts)
+		if deviation != nil {
+			if state.FailEarly {
+				// Fail as soon as the condition is violated.
+				checkError = deviation
+			} else if state.DeviationTitle == "" {
+				// Remember the first deviation to report it at the end of the step.
+				state.DeviationTitle = deviation.Title
+			}
+		}
+		if !state.FailEarly && completed && state.DeviationTitle != "" {
+			checkError = new(action_kit_api.ActionKitError{
+				Title:  state.DeviationTitle,
+				Status: extutil.Ptr(action_kit_api.Failed),
+			})
+		}
 	} else if state.StateCheckMode == stateCheckModeAtLeastOnce {
 		checkError = checkAtLeastOnce(state, completed, firedAlerts)
 	}

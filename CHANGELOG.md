@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add a "Fail early" option to the alert status check. When enabled (the default, matching the previous behavior), the "All the time" mode fails as soon as a deviating state is observed. When disabled, the check keeps collecting events for the whole duration and only fails at the end of the step. Only affects the "All the time" mode.
 - fix: guard the alert check against targets missing the name/url attributes instead of panicking
 - fix: terminate alert paging on the returned page size instead of the server-reported total, preventing an infinite request loop (and dropped results) when Splunk reports an inaccurate total
 
