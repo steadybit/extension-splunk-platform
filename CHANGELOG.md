@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.14
+
+- chore(deps): update dependencies
+
 ## v1.0.13
 
 - Add a "Fail early" option to the alert status check. When enabled (the default, matching the previous behavior), the "All the time" mode fails as soon as a deviating state is observed. When disabled, the check keeps collecting events for the whole duration and only fails at the end of the step. Only affects the "All the time" mode.
