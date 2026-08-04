@@ -57,7 +57,7 @@ func TestAlertCheckAction_Prepare(t *testing.T) {
 }
 
 func TestAlertCheckAction_Start_NoError(t *testing.T) {
-	action := NewAlertCheckAction(nil)
+	action := NewAlertCheckAction(MockSplunkClient{response: []Entry{}})
 	state := action.NewEmptyState()
 	ctx := t.Context()
 
