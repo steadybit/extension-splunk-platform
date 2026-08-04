@@ -221,8 +221,17 @@ func (a *AlertCheckAction) Prepare(_ context.Context, state *AlertCheckState, re
 	return nil, nil
 }
 
-func (a *AlertCheckAction) Start(_ context.Context, _ *AlertCheckState) (*action_kit_api.StartResult, error) {
-	return nil, nil
+func (a *AlertCheckAction) Start(ctx context.Context, state *AlertCheckState) (*action_kit_api.StartResult, error) {
+	statusResult, err := checkFiredAlerts(ctx, state, a.Client)
+	if statusResult == nil {
+		return nil, err
+	}
+	return &action_kit_api.StartResult{
+		Artifacts: statusResult.Artifacts,
+		Error:     statusResult.Error,
+		Messages:  statusResult.Messages,
+		Metrics:   statusResult.Metrics,
+	}, err
 }
 
 func (a *AlertCheckAction) Status(ctx context.Context, state *AlertCheckState) (*action_kit_api.StatusResult, error) {
