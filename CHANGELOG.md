@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.15
+
+- feat: support filtering targets out of discovery
+- fix: emit the alert check metric immediately on Start (#45)
+
 ## v1.0.14
 
 - chore(deps): update dependencies
