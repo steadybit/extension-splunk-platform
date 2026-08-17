@@ -1,6 +1,6 @@
 module github.com/steadybit/extension-splunk-platform
 
-go 1.26.5
+go 1.26
 
 require (
 	github.com/KimMachineGun/automemlimit v0.7.5
