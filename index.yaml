@@ -11,6 +11,36 @@ entries:
         - name: Steadybit reliability hub
           url: https://hub.steadybit.com
     apiVersion: v2
+    appVersion: v1.0.16
+    created: "2026-08-18T12:09:11.196001861Z"
+    dependencies:
+    - name: extensionlib
+      repository: https://steadybit.github.io/helm-charts
+      version: ^1.5.4
+    description: Steadybit Splunk Cloud Platform and Splunk Enterprise extension Helm
+      chart for Kubernetes.
+    digest: 8e69ba2c24b78f51ef1e460ebb2da48abc02cc18e91f4aa3708c5f419fda9dc8
+    home: https://www.steadybit.com/
+    icon: https://steadybit-website-assets.s3.amazonaws.com/logo-symbol-transparent.png
+    maintainers:
+    - email: norbert@steadybit.com
+      name: bertschneider
+    name: steadybit-extension-splunk-platform
+    sources:
+    - https://github.com/steadybit/extension-splunk-platform
+    urls:
+    - https://github.com/steadybit/extension-splunk-platform/releases/download/steadybit-extension-splunk-platform-1.0.23/steadybit-extension-splunk-platform-1.0.23.tgz
+    version: 1.0.23
+  - annotations:
+      artifacthub.io/images: |
+        - name: logo
+          image: https://steadybit-website-assets.s3.amazonaws.com/logo-symbol-transparent.png
+      artifacthub.io/links: |-
+        - name: Steadybit website
+          url: https://www.steadybit.com
+        - name: Steadybit reliability hub
+          url: https://hub.steadybit.com
+    apiVersion: v2
     appVersion: v1.0.15
     created: "2026-08-05T11:43:03.124670321Z"
     dependencies:
@@ -631,4 +661,4 @@ entries:
     urls:
     - https://github.com/steadybit/extension-splunk-platform/releases/download/steadybit-extension-splunk-platform-1.0.1/steadybit-extension-splunk-platform-1.0.1.tgz
     version: 1.0.1
-generated: "2026-08-05T11:43:03.124792599Z"
+generated: "2026-08-18T12:09:11.196164025Z"
