@@ -4,6 +4,8 @@
 package config
 
 import (
+	"strings"
+
 	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog/log"
 )
@@ -23,5 +25,17 @@ func ParseConfiguration() {
 	err := envconfig.Process("steadybit_extension", &Config)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Failed to parse configuration from environment.")
+	}
+}
+
+func ValidateConfiguration() {
+	// envconfig's `required:"true"` only checks that the variable is *set*: an empty
+	// value satisfies it, so the extension would start with a blank configuration and
+	// fail much later against the target system. Reject blank values here instead.
+	if strings.TrimSpace(Config.AccessToken) == "" {
+		log.Fatal().Msg("STEADYBIT_EXTENSION_ACCESS_TOKEN must not be empty.")
+	}
+	if strings.TrimSpace(Config.ApiBaseUrl) == "" {
+		log.Fatal().Msg("STEADYBIT_EXTENSION_API_BASE_URL must not be empty.")
 	}
 }

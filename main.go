@@ -31,6 +31,7 @@ func main() {
 	exthealth.StartProbes(8084)
 
 	config.ParseConfiguration()
+	config.ValidateConfiguration()
 
 	splunkClient := extalert.NewSplunkClient()
 	discovery_kit_sdk.Register(extalert.NewAlertDiscovery(splunkClient))
