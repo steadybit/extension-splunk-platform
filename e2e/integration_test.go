@@ -40,6 +40,7 @@ func TestWithMinikube(t *testing.T) {
 			ExtraArgs: func(m *e2e.Minikube) []string {
 				return []string{
 					"--set", fmt.Sprintf("splunk.apiBaseUrl=https://host.minikube.internal:%s", port),
+					"--set", "splunk.accessToken=access-token-123",
 					"--set", "logging.level=trace",
 					"--set", "splunk.insecureSkipVerify=true", // Enable skipping TLS verification
 				}
@@ -74,6 +75,7 @@ func TestWithMinikube(t *testing.T) {
 			ExtraArgs: func(m *e2e.Minikube) []string {
 				return []string{
 					"--set", fmt.Sprintf("splunk.apiBaseUrl=https://host.minikube.internal:%s", port),
+					"--set", "splunk.accessToken=access-token-123",
 					"--set", "logging.level=trace",
 					"--set", "splunk.insecureSkipVerify=false", // Disable insecureSkipVerify
 					// Use extraVolumeMounts, extraVolumes and extraEnv instead
