@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.23
+
+- chore(deps): bump action_kit_test to v1.4.13 (#57)
+
 ## v1.0.22
 
 - chore(deps): bump golang.org/x/net to v0.61.0
