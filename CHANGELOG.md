@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- feat: the Alert Status check shows Fail early with the other check settings
+
 ## v1.0.24
 
 - chore(deps): bump github.com/KimMachineGun/automemlimit
